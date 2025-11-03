@@ -18,17 +18,42 @@ pipeline
             }
         }
 
-        stage('SAST')
+        stage('SAST-TEST')
         {
+            agent any
             steps
             {
-                sh 'echo Running SAST scan with snyk...'
+                script
+                    {
+                        snykSecurity(
+                            snykInstallation: 'Snyk-installations',
+                            snykTokenId: 'snyk-token',
+                            severity: 'critical'
+                        )
+                    }
+            }
+        }
+
+
+        stage('SonarQube Analysis') {
+            agent {
+            label 'Levi-CYBER-3120-app-server'
+            }
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQube-Scanner'
+                    withSonarQubeEnv('sonarqube-installations') {
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=gameapp \
+                            -Dsonar.sources=."
+                    }
+                }
             }
         }
 
         stage('BUILD-AND-TAG')
         {
-            agent {label 'Levi-CYBER-3120-app-server'}
+            agent { label 'Levi-CYBER-3120-app-server'}
             
             steps
             {
@@ -47,7 +72,7 @@ pipeline
 
         stage('POST-TO-DOCKERHUB')
         {
-            agent {label 'Levi-CYBER-3120-app-server'}
+            agent { label 'Levi-CYBER-3120-app-server'}
             
             steps
             {
@@ -75,7 +100,7 @@ pipeline
 
         stage('Deployment')
         {
-            agent {label 'Levi-CYBER-3120-app-server'}
+            agent { label 'Levi-CYBER-3120-app-server'}
             
             steps
             {
@@ -83,16 +108,16 @@ pipeline
                 script
                 {
                     dir("${WORKSPACE}")
+                    {
                     sh '''
                         docker-compose down
                         docker-compose up -d
                         docker ps
                     '''
-
+                    }
                 }
                     echo 'Deployment completed successfully!'
             }
         }        
     }        
 }
-
