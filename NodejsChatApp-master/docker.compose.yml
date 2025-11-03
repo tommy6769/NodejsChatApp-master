@@ -1,8 +1,8 @@
 
 version: "3.8"
 services:
-  game-test-app-auto:
-    image: tommy6769/levigametest:latest
+  NodejsChatApp-master:
+    image: tommy6769/NodejsChatApp-master:latest
     build: .
     container_name: NodejsChatApp-master
     ports:
