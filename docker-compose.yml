@@ -1,10 +1,10 @@
 
 version: "3.8"
 services:
-  levichat:
-    image: tommy6769/levichat:latest
+  chatbox:
+    image: tommy6769/chatbox:latest
     build: .
-    container_name: levichat
+    container_name: chatbox
     ports:
       - "80:3700"
     environment: 
